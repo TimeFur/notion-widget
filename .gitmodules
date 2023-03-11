@@ -1,0 +1,3 @@
+[submodule "widget"]
+	path = widget
+	url = https://github.com/TimeFur/widget.git
