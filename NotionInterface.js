@@ -49,6 +49,15 @@ const readDatabase = async (dbId, queryFilter = {}) => {
     })
 }
 
+const getDataBaseFormat = async (dbId) => {
+    return new Promise((resolve) => {
+        notion.databases.retrieve({
+            database_id: dbId
+        }).then(format => {
+            resolve(format)
+        })
+    })
+}
 const readPage = async () => {
 
 }
@@ -66,5 +75,6 @@ const updatePages = async (pageId, item, property) => {
 
 export {
     updatePages,
-    readDatabase
+    readDatabase,
+    getDataBaseFormat
 }

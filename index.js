@@ -2,7 +2,7 @@ import dotenv from "dotenv"
 import express from "express"
 import cors from 'cors';
 import path from "path"
-import { updatePages, readDatabase } from './NotionInterface.js';
+import { updatePages, readDatabase, getDataBaseFormat } from './NotionInterface.js';
 
 dotenv.config({ DB_ID: process.env.DATABASE_ID });
 
@@ -105,7 +105,18 @@ app.post('/', (req, res) => {
     console.log("post get ", req.body)
     res.json(req.body)
 })
-
+app.post('/getDB', (req, res) => {
+    var dbKey = req.body.dbKey
+    readDatabase(dbKey).then((dataList) => {
+        res.json({ data: dataList })
+    })
+})
+app.post('/getDBFormat', (req, res) => {
+    var dbKey = req.body.dbKey
+    getDataBaseFormat(dbKey).then((dataList) => {
+        res.json({ data: dataList })
+    })
+})
 //server start listen
 var server = app.listen(process.env.PORT, () => {
     var host = server.address().address
