@@ -1,13 +1,22 @@
 import dotenv from "dotenv"
 import express from "express"
 import cors from 'cors';
-import bodyParser from "body-parser"
+import path from "path"
 import { updatePages, readDatabase } from './NotionInterface.js';
 
 dotenv.config({ DB_ID: process.env.DATABASE_ID });
 
+//get file absolute path
+const __dirname = path.resolve()
 const DB_ID = process.env.DATABASE_ID
 const databaseId = DB_ID
+
+const WIDGET_LIST = {
+    "clock": {
+        "requestPath": "./widget/widget-tools/clock/index.html",
+        'staticPath': 'widget/widget-tools/clock/'
+    }
+}
 /**************************************
  *          Setting config
  **************************************/
@@ -29,33 +38,70 @@ const db_filter = {
  **************************************/
 var app = express()
 
-//support json-encoded and url-encoded bodies
+/**
+ * Setting cors options
+ * If open origin as *, it means open the gate for all source request
+ */
 const corsOptions = {
-    origin: "*",
-    // preflightContinue: false,
+    // origin: "*", 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions))
 
-// parse application/json
+/**
+ * support json-encoded and url-encoded bodies
+ * json: express.json()
+ * url-encoded: urlencoded as false
+ */
 app.use(express.json())
-// parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))
 
-//router
+/**
+ * static file path
+ */
+const staticSetting = () => {
+    for (const [key, item] of Object.entries(WIDGET_LIST)) {
+        app.use(express.static(path.join(__dirname, item['staticPath'])))
+    }
+}
+staticSetting()
+
+/**
+ * middleware router setting
+ */
 app.use(function (req, res, next) {
-    console.log(req.body) // populated!
+    // console.log(req.body) // populated!
     next()
 })
 
-//define get & post request
+//widget send html
+//http://localhost:port/widget?tool=clock
+app.get('/widget', (req, res) => {
+    if (req.query.tool) {
+        var toolType = req.query.tool
+        var localTool = WIDGET_LIST[toolType]
+        if (localTool != undefined) {
+            res.sendFile(localTool['requestPath'], { root: __dirname })
+        } else {
+            res.send("Please select your tool type")
+        }
+    } else {
+        res.send("Please select your tool type")
+    }
+})
+
+/*************************************
+ *          API setting method
+ *      define get & post request
+ *************************************/
 app.get('/', (req, res) => {
     //.params is grab specific parameter
     // res.send("Hello", req.params, req.query)
     res.json({ "Data": "get response" })
 })
 app.post('/', (req, res) => {
+    updatePages('0104c2c4-64f6-438a-aaf6-103731d25817')
     console.log("post get ", req.body)
     res.json(req.body)
 })
