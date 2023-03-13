@@ -100,9 +100,14 @@ app.get('/', (req, res) => {
     // res.send("Hello", req.params, req.query)
     res.json({ "Data": "get response" })
 })
-app.post('/', (req, res) => {
-    updatePages('0104c2c4-64f6-438a-aaf6-103731d25817')
-    console.log("post get ", req.body)
+app.post('/setPageData', (req, res) => {
+    var data = {
+        "Checkbox": {
+            checkbox: true
+        }
+    }
+    updatePages(req.body.pageKey, data)
+
     res.json(req.body)
 })
 app.post('/getDB', (req, res) => {

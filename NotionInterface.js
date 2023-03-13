@@ -61,15 +61,11 @@ const getDataBaseFormat = async (dbId) => {
 const readPage = async () => {
 
 }
-const updatePages = async (pageId, item, property) => {
+const updatePages = async (pageId, data) => {
     console.log(pageId)
     notion.pages.update({
         page_id: pageId,
-        properties: {
-            "Checkbox": {
-                checkbox: true
-            }
-        }
+        properties: data
     })
 }
 
