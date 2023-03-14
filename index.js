@@ -9,29 +9,17 @@ dotenv.config({ DB_ID: process.env.DATABASE_ID });
 //get file absolute path
 const __dirname = path.resolve()
 const DB_ID = process.env.DATABASE_ID
-const databaseId = DB_ID
 
 const WIDGET_LIST = {
     "clock": {
         "requestPath": "./widget/widget-tools/clock/index.html",
-        'staticPath': 'widget/widget-tools/clock/'
+        'staticPath': 'widget/widget-tools/clock/',
+        "storageKey": process.env.LOCALSTORAGE_KEY
     }
 }
 /**************************************
  *          Setting config
  **************************************/
-const db_filter = {
-    // property: "Checkbox",
-    // "checkbox": {
-    //     'equals': true
-    // }
-}
-// readDatabase(databaseId, db_filter)
-//     .then((dbList) => {
-//         console.log(dbList)
-//     })
-// updatePages('0104c2c4-64f6-438a-aaf6-103731d25817')
-// console.log(notion.databases.update)
 
 /**************************************
  *          Server start
@@ -101,11 +89,25 @@ app.get('/', (req, res) => {
     res.json({ "Data": "get response" })
 })
 app.post('/setPageData', (req, res) => {
+    console.log(req.body)
+
+    const { property, type, options } = req.body.data
+    var setValue = true
+    if (type == "multi_select") {
+        setValue = []
+        options.forEach(d => { setValue.push({ "name": d }) })
+    } else if (type == "status") {
+        setValue = { 'name': options[0] }
+    } else if (type == 'checkbox') {
+        setValue = (options[0] == 'true') ? true : false
+    }
+
     var data = {
-        "Checkbox": {
-            checkbox: true
+        [property]: {
+            [type]: setValue
         }
     }
+    // console.log(data)
     updatePages(req.body.pageKey, data)
 
     res.json(req.body)
