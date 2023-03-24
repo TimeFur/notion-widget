@@ -13,8 +13,11 @@ const DB_ID = process.env.DATABASE_ID
 const WIDGET_LIST = {
     "clock": {
         "requestPath": "./widget/widget-tools/clock/index.html",
-        'staticPath': 'widget/widget-tools/clock/',
-        "storageKey": process.env.LOCALSTORAGE_KEY
+        'staticPath': ['widget/widget-tools/clock']
+    },
+    "fold-card": {
+        "requestPath": "./widget/widget-tools/fold-card/index.html",
+        'staticPath': ['widget/widget-tools/fold-card']
     }
 }
 /**************************************
@@ -48,18 +51,28 @@ app.use(express.urlencoded({ extended: false }))
 /**
  * static file path
  */
-const staticSetting = () => {
-    for (const [key, item] of Object.entries(WIDGET_LIST)) {
-        app.use(express.static(path.join(__dirname, item['staticPath'])))
-    }
+const staticSetting = (widgetKey = "clock") => {
+    var staticPathList = WIDGET_LIST[widgetKey].staticPath
+    console.log(staticPathList)
+    staticPathList.forEach((staticPath) => {
+        app.use(express.static(path.join(__dirname, staticPath)))
+    })
 }
-staticSetting()
-
 /**
  * middleware router setting
  */
-app.use(function (req, res, next) {
-    // console.log(req.body) // populated!
+app.use('/widget', function (req, res, next) {
+    if (req.query.tool) {
+        var toolType = req.query.tool
+        var staticList = WIDGET_LIST[toolType]
+        if (staticList != undefined) {
+            var staticPathList = staticList['staticPath']
+            staticPathList.forEach((staticPath) => {
+                // console.log(toolType, path.join(__dirname, staticPath))
+                app.use(`/${toolType}`, express.static(path.join(__dirname, staticPath)))
+            })
+        }
+    }
     next()
 })
 
@@ -86,7 +99,7 @@ app.get('/widget', (req, res) => {
 app.get('/', (req, res) => {
     //.params is grab specific parameter
     // res.send("Hello", req.params, req.query)
-    res.json({ "Data": "get response" })
+    res.json({ "Data": "get response~" })
 })
 app.post('/setPageData', (req, res) => {
     console.log(req.body)
